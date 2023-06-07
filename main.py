@@ -1,25 +1,7 @@
 from tkinter import Tk, Canvas, Button, PhotoImage, Entry
 import random
 
-# ---------------------------- CONSTANTS ------------------------------- #
-# Fonts.
-TITLE_FONT = ("Myriad Pro Black", 30, "bold")
-STARTING_TIMER_FONT = ("Myriad Pro Black", 80, "bold")
-GAME_TIMER_FONT = ("Courier", 25, "bold")
-WORD_FONT = ("Arial", 20, "bold")
-ENTRY_FONT = ("Arial", 15)
-RESULTS_SCORE = ("Myriad Pro Black", 20, "bold")
-
-# Colors.
-BACKGROUND_COLOR = "#D3D3D3"
-WINDOW_GEOMETRY = "500x500"
-TITLE_COLOR = "#009bff"
-
-# Sizes and positions.
-WINDOW_WIDTH = 500
-WINDOW_HEIGHT = 500
-
-GAME_TIMER = 60  # Game time in seconds.
+from config import Config
 
 
 class TypingSpeedTest:
@@ -29,11 +11,11 @@ class TypingSpeedTest:
         self.window.title("Typing Speed Test")
 
         # Create the Canvas on the window.
-        self.canvas = Canvas(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
+        self.canvas = Canvas(width=Config.WINDOW_WIDTH, height=Config.WINDOW_HEIGHT)
         self.canvas.grid(row=0, column=0)
 
         # Starting timer text and counter.
-        self.start_timer_text = self.canvas.create_text(WINDOW_WIDTH // 2, 200, text="", font=STARTING_TIMER_FONT)
+        self.start_timer_text = self.canvas.create_text(Config.WINDOW_WIDTH // 2, 200, text="", font=Config.STARTING_TIMER_FONT)
         self.start_timer_counter = 3
         self.starting_timer = None
 
@@ -44,23 +26,25 @@ class TypingSpeedTest:
         self.start_button.place(x=180, y=250)
 
         # Main game title.
-        self.title_label = self.canvas.create_text(260, 40, text="Typing Speed Test", font=TITLE_FONT,
-                                                   fill=TITLE_COLOR)
+        self.title_label = self.canvas.create_text(260, 40, text="Typing Speed Test", font=Config.TITLE_FONT,
+                                                   fill=Config.TITLE_COLOR)
 
         # Game timer.
         self.timer_text = self.canvas.create_text(45, 40, text="", fill="black",
-                                                  font=GAME_TIMER_FONT)
+                                                  font=Config.GAME_TIMER_FONT)
         self.game_timer = None
 
         # Create words following variables.
-        self.correct = self.canvas.create_text(50, WINDOW_HEIGHT / 4.5, text="", font=RESULTS_SCORE, fill="green")
-        self.incorrect = self.canvas.create_text(WINDOW_WIDTH - 50, WINDOW_HEIGHT / 4.5, text="", font=RESULTS_SCORE,
+        self.correct = self.canvas.create_text(50, Config.WINDOW_HEIGHT / 4.5, text="", font=Config.RESULTS_SCORE,
+                                               fill="green")
+        self.incorrect = self.canvas.create_text(Config.WINDOW_WIDTH - 50, Config.WINDOW_HEIGHT / 4.5, text="",
+                                                 font=Config.RESULTS_SCORE,
                                                  fill="red")
         self.correct_counter = 0
         self.incorrect_counter = 0
 
         # Current word and user Entry object.
-        self.current_word = self.canvas.create_text(250, 250, text="", font=WORD_FONT)
+        self.current_word = self.canvas.create_text(250, 250, text="", font=Config.WORD_FONT)
         self.user_entry = None
         self.write_here = None
 
@@ -127,7 +111,7 @@ class TypingSpeedTest:
         self.canvas.itemconfig(self.incorrect, text="0")
 
         # Start game timer, user input graphics and get first word to show.
-        self.timer_count_down(GAME_TIMER)
+        self.timer_count_down(Config.GAME_TIMER)
         self.create_user_input()
         self.get_next_word()
 
@@ -136,9 +120,9 @@ class TypingSpeedTest:
         Function handles the user input graphics.
         :return: None.
         """
-        self.user_entry = Entry(self.canvas, font=ENTRY_FONT, width=15, bd=2, relief="groove",
+        self.user_entry = Entry(self.canvas, font=Config.ENTRY_FONT, width=15, bd=2, relief="groove",
                                 fg="black", bg="lightgray")
-        self.user_entry.place(x=140, y=400)
+        self.user_entry.place(x=150, y=400)
         self.user_entry.focus_set()
         self.write_here = self.canvas.create_text(250, 390, text="Write words here. ENTER for new word.",
                                                   font=("Courier", 10, "bold"),
@@ -187,20 +171,20 @@ class TypingSpeedTest:
         self.canvas.itemconfig(self.current_word, text="")
         self.canvas.itemconfig(self.write_here, text="")
 
-        self.canvas.create_text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50,
+        self.canvas.create_text(Config.WINDOW_WIDTH / 2, Config.WINDOW_HEIGHT / 2 - 50,
                                 text=f"Time's UP!\n",
                                 fill="black",
-                                font=RESULTS_SCORE)
-        self.canvas.create_text(WINDOW_WIDTH / 2 - 100,
-                                WINDOW_HEIGHT / 2,
+                                font=Config.RESULTS_SCORE)
+        self.canvas.create_text(Config.WINDOW_WIDTH / 2 - 100,
+                                Config.WINDOW_HEIGHT / 2,
                                 text=f"Correct:\n{self.correct_counter}",
                                 fill="green",
-                                font=RESULTS_SCORE)
-        self.canvas.create_text(WINDOW_WIDTH / 2 + 100,
-                                WINDOW_HEIGHT / 2,
+                                font=Config.RESULTS_SCORE)
+        self.canvas.create_text(Config.WINDOW_WIDTH / 2 + 100,
+                                Config.WINDOW_HEIGHT / 2,
                                 text=f"Incorrect:\n{self.incorrect_counter}",
                                 fill="red",
-                                font=RESULTS_SCORE)
+                                font=Config.RESULTS_SCORE)
 
 
 if __name__ == "__main__":
