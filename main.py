@@ -7,6 +7,7 @@ TITLE_FONT = ("Myriad Pro Black", 30, "bold")
 STARTING_TIMER_FONT = ("Myriad Pro Black", 80, "bold")
 GAME_TIMER_FONT = ("Courier", 25, "bold")
 WORD_FONT = ("Arial", 20, "bold")
+ENTRY_FONT = ("Arial", 15)
 RESULTS_SCORE = ("Myriad Pro Black", 20, "bold")
 
 # Colors.
@@ -33,10 +34,10 @@ class TypingSpeedTest:
 
         # Starting timer text and counter.
         self.start_timer_text = self.canvas.create_text(WINDOW_WIDTH // 2, 200, text="", font=STARTING_TIMER_FONT)
-        self.start_timer_counter = 1
+        self.start_timer_counter = 3
         self.starting_timer = None
 
-        # Create the start image and button objects.
+        # Starting image and button objects.
         self.start_button_image = PhotoImage(file="images/start_button.png")
         self.start_button = Button(self.canvas, highlightthickness=0, bd=0, image=self.start_button_image,
                                    command=lambda: self.start_countdown(self.start_timer_counter))
@@ -135,9 +136,9 @@ class TypingSpeedTest:
         Function handles the user input graphics.
         :return: None.
         """
-        self.user_entry = Entry(self.canvas, font=WORD_FONT, width=15, bd=2, relief="groove",
+        self.user_entry = Entry(self.canvas, font=ENTRY_FONT, width=15, bd=2, relief="groove",
                                 fg="black", bg="lightgray")
-        self.user_entry.place(x=170, y=400)
+        self.user_entry.place(x=140, y=400)
         self.user_entry.focus_set()
         self.write_here = self.canvas.create_text(250, 390, text="Write words here. ENTER for new word.",
                                                   font=("Courier", 10, "bold"),
