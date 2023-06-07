@@ -2,8 +2,6 @@
 
 A simple typing speed test application built with Python and Tkinter.
 
-![Typing Speed Test Screenshot](screenshot.png)
-
 ## Description
 
 The Typing Speed Test is a Python application that allows users to test their typing speed and accuracy.
