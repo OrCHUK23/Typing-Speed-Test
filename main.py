@@ -4,11 +4,10 @@ import random
 # ---------------------------- CONSTANTS ------------------------------- #
 # Fonts.
 TITLE_FONT = ("Myriad Pro Black", 30, "bold")
-START_FONT = ("Myriad Pro Black", 15, "bold")
-WORD_FONT = ("Myriad Pro Black", 20, "bold")
-SCORE_FONT = ("Myriad Pro Black", 20, "bold")
-STARTING_FONT = ("Myriad Pro Black", 80, "bold")
-TIMER_FONT = ("Courier", 25, "bold")
+STARTING_TIMER_FONT = ("Myriad Pro Black", 80, "bold")
+GAME_TIMER_FONT = ("Courier", 25, "bold")
+WORD_FONT = ("Arial", 20, "bold")
+RESULTS_SCORE = ("Myriad Pro Black", 20, "bold")
 
 # Colors.
 BACKGROUND_COLOR = "#D3D3D3"
@@ -19,7 +18,7 @@ TITLE_COLOR = "#009bff"
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
 
-GAME_TIMER = 3  # Game time in seconds.
+GAME_TIMER = 60  # Game time in seconds.
 
 
 class TypingSpeedTest:
@@ -33,7 +32,7 @@ class TypingSpeedTest:
         self.canvas.grid(row=0, column=0)
 
         # Starting timer text and counter.
-        self.start_timer_text = self.canvas.create_text(WINDOW_WIDTH // 2, 200, text="", font=STARTING_FONT)
+        self.start_timer_text = self.canvas.create_text(WINDOW_WIDTH // 2, 200, text="", font=STARTING_TIMER_FONT)
         self.start_timer_counter = 1
         self.starting_timer = None
 
@@ -49,12 +48,12 @@ class TypingSpeedTest:
 
         # Game timer.
         self.timer_text = self.canvas.create_text(45, 40, text="", fill="black",
-                                                  font=TIMER_FONT)
+                                                  font=GAME_TIMER_FONT)
         self.game_timer = None
 
         # Create words following variables.
-        self.correct = self.canvas.create_text(50, WINDOW_HEIGHT / 4.5, text="", font=SCORE_FONT, fill="green")
-        self.incorrect = self.canvas.create_text(WINDOW_WIDTH - 50, WINDOW_HEIGHT / 4.5, text="", font=SCORE_FONT,
+        self.correct = self.canvas.create_text(50, WINDOW_HEIGHT / 4.5, text="", font=RESULTS_SCORE, fill="green")
+        self.incorrect = self.canvas.create_text(WINDOW_WIDTH - 50, WINDOW_HEIGHT / 4.5, text="", font=RESULTS_SCORE,
                                                  fill="red")
         self.correct_counter = 0
         self.incorrect_counter = 0
@@ -190,17 +189,17 @@ class TypingSpeedTest:
         self.canvas.create_text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50,
                                 text=f"Time's UP!\n",
                                 fill="black",
-                                font=SCORE_FONT)
+                                font=RESULTS_SCORE)
         self.canvas.create_text(WINDOW_WIDTH / 2 - 100,
                                 WINDOW_HEIGHT / 2,
-                                text=f"Correct words:\n{self.correct_counter}",
+                                text=f"Correct:\n{self.correct_counter}",
                                 fill="green",
-                                font=SCORE_FONT)
+                                font=RESULTS_SCORE)
         self.canvas.create_text(WINDOW_WIDTH / 2 + 100,
                                 WINDOW_HEIGHT / 2,
-                                text=f"Incorrect words:\n{self.incorrect_counter}",
+                                text=f"Incorrect:\n{self.incorrect_counter}",
                                 fill="red",
-                                font=SCORE_FONT)
+                                font=RESULTS_SCORE)
 
 
 if __name__ == "__main__":
