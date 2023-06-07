@@ -1,177 +1,208 @@
-import math
 from tkinter import Tk, Canvas, Button, PhotoImage, Entry
-import tkinter.font as tkfont
 import random
-from PIL import Image, ImageTk, ImageDraw
 
-WINDOW_GEOMETRY = "500x500"
-BACKGROUND_COLOR = "#D3D3D3"
-TITLE_COLOR = "#009bff"
+# ---------------------------- CONSTANTS ------------------------------- #
+# Fonts.
 TITLE_FONT = ("Myriad Pro Black", 30, "bold")
 START_FONT = ("Myriad Pro Black", 15, "bold")
+WORD_FONT = ("Myriad Pro Black", 20, "bold")
+SCORE_FONT = ("Myriad Pro Black", 20, "bold")
+STARTING_FONT = ("Myriad Pro Black", 80, "bold")
 TIMER_FONT = ("Courier", 25, "bold")
-WORDS_FONT = ("Myriad Pro Black", 10, "bold")
 
+# Colors.
+BACKGROUND_COLOR = "#D3D3D3"
+WINDOW_GEOMETRY = "500x500"
+TITLE_COLOR = "#009bff"
+
+# Sizes and positions.
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
 
-STARTING_X_POS = 100
-STARTING_Y_POS = 150
-
-GAME_TIME = 2  # Game time in seconds
+GAME_TIMER = 3  # Game time in seconds.
 
 
-def center_window(wnd):
-    """
-    Function centers the tkinter window.
-    :param wnd: Tkinter.
-    :return: None
-    """
-    wnd.update_idletasks()
-    width = wnd.winfo_width()
-    height = wnd.winfo_height()
-    x = (wnd.winfo_screenwidth() // 2) - (width // 2)
-    y = (wnd.winfo_screenheight() // 2) - (height // 2)
-    wnd.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+class TypingSpeedTest:
+    def __init__(self):
+        # Create the window.
+        self.window = Tk()
+        self.window.title("Typing Speed Test")
 
+        # Create the Canvas on the window.
+        self.canvas = Canvas(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
+        self.canvas.grid(row=0, column=0)
 
-def start_button_clicked():
-    """
-    Function destroys the start button and starts the game.
-    :return: None
-    """
-    start_button.destroy()
-    start_game()
+        # Starting timer text and counter.
+        self.start_timer_text = self.canvas.create_text(WINDOW_WIDTH // 2, 200, text="", font=STARTING_FONT)
+        self.start_timer_counter = 1
+        self.starting_timer = None
 
+        # Create the start image and button objects.
+        self.start_button_image = PhotoImage(file="images/start_button.png")
+        self.start_button = Button(self.canvas, highlightthickness=0, bd=0, image=self.start_button_image,
+                                   command=lambda: self.start_countdown(self.start_timer_counter))
+        self.start_button.place(x=180, y=250)
 
-def generate_random_word():
-    """
-    Function generates random word from the .txt file
-    :return: String
-    """
-    with open("data/words.txt", "r") as file:
-        words_list = [word.strip() for word in file.readlines()]
-    return random.choice(words_list)
+        # Main game title.
+        self.title_label = self.canvas.create_text(260, 40, text="Typing Speed Test", font=TITLE_FONT,
+                                                   fill=TITLE_COLOR)
 
+        # Game timer.
+        self.timer_text = self.canvas.create_text(45, 40, text="", fill="black",
+                                                  font=TIMER_FONT)
+        self.game_timer = None
 
-def end_game():
-    """
-    Function handles the ending of the game after time's up.
-    :return: None
-    """
-    global user_entry
-    user_entry.delete(0, "end")
-    user_entry.config(state="disabled")
-    for text_object_id, _ in text_objects:
-        canvas.delete(text_object_id)
-    # TODO: Show final score.
-    # TODO: add start over button.
+        # Create words following variables.
+        self.correct = self.canvas.create_text(50, WINDOW_HEIGHT / 4.5, text="", font=SCORE_FONT, fill="green")
+        self.incorrect = self.canvas.create_text(WINDOW_WIDTH - 50, WINDOW_HEIGHT / 4.5, text="", font=SCORE_FONT,
+                                                 fill="red")
+        self.correct_counter = 0
+        self.incorrect_counter = 0
 
+        # Current word and user Entry object.
+        self.current_word = self.canvas.create_text(250, 250, text="", font=WORD_FONT)
+        self.user_entry = None
+        self.write_here = None
 
-def count_down(count):
-    """
-    Function handles the timer start
-    :param count: Int.
-    :return: None.
-    """
-    canvas.itemconfig(timer_text, text=f"{count}")
+        # Center the window.
+        self.__center_window()
 
-    if count > 0:
-        global my_timer
-        my_timer = window.after(1000, count_down, count - 1)
-    else:
-        end_game()
-        canvas.itemconfig(timer_text, text=f"")  # Make timer disappear.
-        print("DONE")
+        # Create random words list.
+        with open("data/words.txt", "r") as file:
+            self.words_list = random.sample([word.strip() for word in file.readlines()], 500)
 
-
-def start_game():
-    """
-    Function handles the game.
-    :return: None
-    """
-
-    def get_user_input(event):
+    def __center_window(self):
         """
-        Function to handle the user's input.
+        Function centers the window object.
+        :return: None.
+        """
+        self.window.update_idletasks()
+        width = self.window.winfo_width()
+        height = self.window.winfo_height()
+        x = (self.window.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.window.winfo_screenheight() // 2) - (height // 2)
+        self.window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+
+    # 3 2 1 At the beginning.
+    def start_countdown(self, count):
+        """
+        Function handles the first screen countdown.
+        :param count: int
+        :return: None.
+        """
+        # Handle starting button clicked again.
+        if self.starting_timer is not None:
+            self.window.after_cancel(self.starting_timer)
+
+        self.canvas.itemconfig(self.start_timer_text, text=self.start_timer_counter)
+
+        if count > 0:
+            self.canvas.itemconfig(self.start_timer_text, text=str(count))
+            self.starting_timer = self.window.after(1000, self.start_countdown, count - 1)
+        else:
+            self.canvas.itemconfig(self.start_timer_text, text="")
+            self.start_game()
+
+    def timer_count_down(self, count):
+        """
+        Function handles the main timer countdown.
+        :param count: Int.
         :return: None
         """
-        user_input = ""
-        if event.keysym == "Return":
-            user_input = user_entry.get()
-            print(user_input)
-            user_entry.delete(0, "end")
+        self.canvas.itemconfig(self.timer_text, text=count)
+
+        if count > 0:
+            self.game_timer = self.window.after(1000, self.timer_count_down, count - 1)
         else:
-            user_input += event.char  # Add the entered character to the user input
+            self.end_game()
 
-    # Get current x and y cords.
-    current_x = STARTING_X_POS
-    current_y = STARTING_Y_POS
-    # Manage words creation.
-    for _ in range(20):
-        word = generate_random_word()  # Generate random word
-        text_object = canvas.create_text(current_x, current_y, text=word, fill="black", font=WORDS_FONT)
-        text_objects.append((text_object, word))  # Add each object to a list.
-        bounds = canvas.bbox(text_object)  # returns a tuple like (x1, y1, x2, y2).
-        width = bounds[2] - bounds[0]  # Calc word width.
-        x_coor = bounds[2]
-        offset = 5  # Spacing between words.
-        current_x = width + x_coor
-        if current_x + offset >= WINDOW_WIDTH:  # Check if we've reached the window width.
-            current_x = 100  # Reset the x_coor to the starting position.
-            current_y += 50
-        # TODO: Check height collision.
+    def start_game(self):
+        """
+        Function handles game started.
+        :return: None
+        """
+        # Destroy start button and reset answers counter.
+        self.start_button.destroy()
+        self.canvas.itemconfig(self.correct, text="0")
+        self.canvas.itemconfig(self.incorrect, text="0")
 
-    # Create the user input rectangle.
-    global user_entry
-    user_entry = Entry(canvas,
-                       font=("Myriad Pro Black", 14),
-                       width=15,
-                       bd=2,
-                       relief="groove",
-                       fg="black",
-                       bg="lightgray")
-    user_entry.place(x=170, y=400)
-    user_entry.focus_set()
+        # Start game timer, user input graphics and get first word to show.
+        self.timer_count_down(GAME_TIMER)
+        self.create_user_input()
+        self.get_next_word()
 
-    # Bind the <Key> event to the user input rectangle.
-    user_entry.bind("<Key>", get_user_input)
+    def create_user_input(self):
+        """
+        Function handles the user input graphics.
+        :return: None.
+        """
+        self.user_entry = Entry(self.canvas, font=WORD_FONT, width=15, bd=2, relief="groove",
+                                fg="black", bg="lightgray")
+        self.user_entry.place(x=170, y=400)
+        self.user_entry.focus_set()
+        self.write_here = self.canvas.create_text(250, 390, text="Write words here. ENTER for new word.",
+                                                  font=("Courier", 10, "bold"),
+                                                  fill="purple")
 
-    # Create user input label.
-    canvas.create_text(270, 390, text="Write words here. ENTER for new word.")
+        # Bind users key to check input.
+        self.user_entry.bind("<Key>", self.check_user_input)
 
-    # Start time countdown.
-    count_down(GAME_TIME)
+    def check_user_input(self, event):
+        """
+        Function checks user input and handles it accordingly.
+        :param event: Tkinter Event object.
+        :return: None.
+        """
+        # Check if "ENTER" key was pressed.
+        if event.keysym == "Return":
+            if self.user_entry.get() == self.canvas.itemcget(self.current_word, "text"):
+                self.correct_counter += 1
+                self.canvas.itemconfig(self.correct, text=self.correct_counter)
+            else:
+                self.incorrect_counter += 1
+                self.canvas.itemconfig(self.incorrect, text=self.incorrect_counter)
+            self.user_entry.delete(0, "end")  # Empty user input.
+            self.get_next_word()
 
+    def get_next_word(self):
+        """
+        Function handles the next word.
+        :return: None.
+        """
+        next_word = random.choice(self.words_list)
+        self.canvas.itemconfig(self.current_word, text=next_word)
 
-# Create window.
-window = Tk()
-window.title("Typing Speed Test")
+    def end_game(self):
+        """
+        Function handles the end of the game, gives score and offers a new game.
+        :return: None
+        """
+        self.user_entry.destroy()
 
-# Create canvas.
-canvas = Canvas(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
-canvas.grid(row=0, column=0)
+        self.canvas.itemconfig(self.correct, text="")
+        self.canvas.itemconfig(self.incorrect, text="")
 
-# Create start button
-start_button_image = PhotoImage(file="images/start_button.png")
-start_button = Button(canvas, highlightthickness=0, bd=0, image=start_button_image, command=start_button_clicked)
-start_button.place(x=180, y=250)
+        self.canvas.itemconfig(self.timer_text, text="")
 
-# Create title text.
-title_label = canvas.create_text(260, 40, text="Typing Speed Test", font=TITLE_FONT, fill=TITLE_COLOR)
+        self.canvas.itemconfig(self.current_word, text="")
+        self.canvas.itemconfig(self.write_here, text="")
 
-# Words objects list.
-text_objects = []
+        self.canvas.create_text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50,
+                                text=f"Time's UP!\n",
+                                fill="black",
+                                font=SCORE_FONT)
+        self.canvas.create_text(WINDOW_WIDTH / 2 - 100,
+                                WINDOW_HEIGHT / 2,
+                                text=f"Correct words:\n{self.correct_counter}",
+                                fill="green",
+                                font=SCORE_FONT)
+        self.canvas.create_text(WINDOW_WIDTH / 2 + 100,
+                                WINDOW_HEIGHT / 2,
+                                text=f"Incorrect words:\n{self.incorrect_counter}",
+                                fill="red",
+                                font=SCORE_FONT)
 
-# Create user input object.
-user_entry = None
-
-# Timer creation
-timer_text = canvas.create_text(45, 40, text="", fill="black", font=(TIMER_FONT, 35, "bold"))
-my_timer = None
-
-# Make the window to be in the center.
-center_window(window)
 
 if __name__ == "__main__":
-    window.mainloop()
+    game = TypingSpeedTest()
+    game.window.mainloop()
